@@ -118,6 +118,23 @@
   .med.finished .name{text-decoration:line-through; text-decoration-color:var(--done)}
   .med.notyet{opacity:.5}
 
+  /* ---- Alerta de dose (aparece ~5min antes e fica até marcar) ---- */
+  .due-alert{
+    position:sticky; top:8px; z-index:50; background:var(--sos); color:#fff;
+    border-radius:12px; padding:13px 16px; box-shadow:0 6px 18px rgba(0,0,0,.22);
+  }
+  .due-alert .da-title{ font-weight:800; font-size:1.06rem; }
+  .due-alert .da-list{ margin-top:6px; font-size:.98rem; line-height:1.55; }
+  .due-alert .da-list .t{ font-variant-numeric:tabular-nums; font-weight:700; }
+  .due-alert .da-hint{ margin-top:6px; font-size:.82rem; opacity:.92; }
+  .due-alert.pulse{ animation:dueGlow 1.3s ease-in-out infinite; }
+  @keyframes dueGlow{
+    0%,100%{ box-shadow:0 6px 18px rgba(0,0,0,.22); }
+    50%{ box-shadow:0 0 0 5px rgba(180,83,42,.45), 0 6px 18px rgba(0,0,0,.28); }
+  }
+  .med.due{ border-color:var(--sos); box-shadow:0 0 0 2px var(--sos) inset; }
+  @media (prefers-reduced-motion: reduce){ .due-alert.pulse{ animation:none; } }
+
   .meal{
     grid-column:2; color:var(--muted); font-size:.82rem; font-weight:600;
     padding:2px 4px; letter-spacing:.04em;
@@ -165,6 +182,8 @@
 
 <div class="wrap">
 
+  <div class="due-alert" id="dueAlert" style="display:none"></div>
+
   <header>
     <p class="eyebrow">Pós-operatório · Mastologia</p>
     <h1>Rotina de medicação — Bruna</h1>
@@ -189,7 +208,7 @@
 
       <div class="slot">
         <div class="hour">06:30<small>JEJUM</small></div>
-        <div class="med" data-id="pantoprazol" data-startoff="1">
+        <div class="med" data-id="pantoprazol" data-startoff="1" data-time="06:30">
           <label>
             <input type="checkbox">
             <span class="body">
@@ -208,7 +227,7 @@
 
       <div class="slot">
         <div class="hour">07:30</div>
-        <div class="med" data-id="preni" data-startoff="1">
+        <div class="med" data-id="preni" data-startoff="1" data-time="07:30">
           <label>
             <input type="checkbox">
             <span class="body">
@@ -222,7 +241,7 @@
 
       <div class="slot">
         <div class="hour">08:00</div>
-        <div class="med" data-id="cefadroxil1" data-startoff="1">
+        <div class="med" data-id="cefadroxil1" data-startoff="1" data-time="08:00">
           <label>
             <input type="checkbox">
             <span class="body">
@@ -236,7 +255,7 @@
 
       <div class="slot">
         <div class="hour">09:00</div>
-        <div class="med" data-id="lisador1" data-startoff="1">
+        <div class="med" data-id="lisador1" data-startoff="1" data-time="09:00">
           <label>
             <input type="checkbox">
             <span class="body">
@@ -264,7 +283,7 @@
 
       <div class="slot">
         <div class="hour">15:00</div>
-        <div class="med" data-id="lisador2">
+        <div class="med" data-id="lisador2" data-time="15:00">
           <label>
             <input type="checkbox">
             <span class="body">
@@ -277,7 +296,7 @@
 
       <div class="slot">
         <div class="hour">18:00</div>
-        <div class="med" data-id="enoxaparina">
+        <div class="med" data-id="enoxaparina" data-time="18:00">
           <label>
             <input type="checkbox">
             <span class="body">
@@ -292,7 +311,7 @@
 
       <div class="slot">
         <div class="hour">20:00</div>
-        <div class="med" data-id="cefadroxil2">
+        <div class="med" data-id="cefadroxil2" data-time="20:00">
           <label>
             <input type="checkbox">
             <span class="body">
@@ -306,7 +325,7 @@
 
       <div class="slot">
         <div class="hour">21:00</div>
-        <div class="med" data-id="lisador3">
+        <div class="med" data-id="lisador3" data-time="21:00">
           <label>
             <input type="checkbox">
             <span class="body">
@@ -319,7 +338,7 @@
 
       <div class="slot">
         <div class="hour">~21:30<small>BANHO</small></div>
-        <div class="med" data-id="curativo">
+        <div class="med" data-id="curativo" data-time="21:30">
           <label>
             <input type="checkbox">
             <span class="body">
@@ -346,7 +365,7 @@
 
       <div class="slot">
         <div class="hour">03:00</div>
-        <div class="med" data-id="lisador4">
+        <div class="med" data-id="lisador4" data-time="03:00">
           <label>
             <input type="checkbox">
             <span class="body">
@@ -506,6 +525,7 @@
       try { localStorage.setItem(storeKey, JSON.stringify(state)); } catch(e){}
       card.classList.toggle('checked-card', cb.checked && !card.closest('.slot').classList.contains('sos'));
       updateProgress();
+      checkDue();
     });
   });
 
@@ -523,6 +543,81 @@
   }
 
   renderChips();
+
+  // ---------- Alerta de dose: aparece ~5 min antes e fica até marcarem ----------
+  var LEAD_MIN = 5;
+  var prevDueKey = '';
+  var actx = null;
+
+  function beep(){
+    try{
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      if (actx.state === 'suspended') actx.resume();
+      var o = actx.createOscillator(), g = actx.createGain();
+      o.connect(g); g.connect(actx.destination);
+      o.type = 'sine'; o.frequency.value = 880;
+      g.gain.setValueAtTime(0.0001, actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.25, actx.currentTime + 0.05);
+      g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + 0.6);
+      o.start(); o.stop(actx.currentTime + 0.65);
+    }catch(e){}
+  }
+
+  function checkDue(){
+    var now = new Date();
+    var nowMin = now.getHours()*60 + now.getMinutes();
+    var due = [];
+    cards.forEach(function(card){
+      if (card.closest('.slot').classList.contains('sos')) return;
+      if (card.classList.contains('notyet') || card.classList.contains('finished')){ card.classList.remove('due'); return; }
+      var t = card.dataset.time; if (!t) return;
+      if (card.querySelector('input').checked){ card.classList.remove('due'); return; }
+      var p = t.split(':'), h = +p[0], medMin = h*60 + (+p[1]);
+      var isDue = (h < 5)
+        ? (nowMin >= medMin - LEAD_MIN && nowMin < 5*60)   // dose de madrugada: só alerta de madrugada
+        : (nowMin >= medMin - LEAD_MIN);
+      if (isDue){
+        card.classList.add('due');
+        due.push({ t:t, min:medMin, label: card.querySelector('.name').firstChild.textContent.trim() });
+      } else {
+        card.classList.remove('due');
+      }
+    });
+    renderAlert(nowMin, due);
+  }
+
+  function renderAlert(nowMin, due){
+    var banner = document.getElementById('dueAlert');
+    if (!due.length){ banner.style.display='none'; banner.classList.remove('pulse'); prevDueKey=''; return; }
+    due.sort(function(a,b){ return a.min - b.min; });
+    var itens = due.map(function(d){
+      var atraso = nowMin - d.min;
+      var quando = atraso >= 1 ? ' — atrasado ' + atraso + ' min'
+                 : (atraso < 0 ? ' — em ' + (-atraso) + ' min' : ' — agora');
+      return '<div>• ' + d.label + ' <span class="t">' + d.t + '</span>' + quando + '</div>';
+    }).join('');
+    banner.innerHTML =
+      '<div class="da-title">⏰ ' + (due.length===1 ? 'Hora do remédio' : 'Hora de ' + due.length + ' remédios') + '</div>' +
+      '<div class="da-list">' + itens + '</div>' +
+      '<div class="da-hint">Marque na lista abaixo quando tomar — o aviso some sozinho.</div>';
+    banner.style.display = '';
+    banner.classList.add('pulse');
+    var key = due.map(function(d){ return d.label; }).join('|');
+    if (key !== prevDueKey){
+      try{ if (navigator.vibrate) navigator.vibrate([250,120,250]); }catch(e){}
+      beep();
+      prevDueKey = key;
+    }
+  }
+
+  // navegadores só tocam som depois de um toque do usuário — destrava no 1º toque
+  document.addEventListener('click', function unlock(){
+    try{ actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state==='suspended') actx.resume(); }catch(e){}
+    document.removeEventListener('click', unlock);
+  }, { once:true });
+
+  checkDue();
+  setInterval(checkDue, 30000);
 })();
 </script>
 </body></html>
