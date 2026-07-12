@@ -1,0 +1,528 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>Rotina de medicação</title></head><body><style>
+  :root{
+    --paper:#F7FAF8;
+    --card:#FFFFFF;
+    --ink:#1E2B27;
+    --muted:#5B6B65;
+    --line:#DEE7E2;
+    --accent:#0E7C66;
+    --accent-soft:#E3F1EC;
+    --sos:#B4532A;
+    --sos-soft:#F9EDE5;
+    --done:#8FA69E;
+    --shadow:0 1px 3px rgba(30,43,39,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#111916;
+      --card:#1A2420;
+      --ink:#E4ECE8;
+      --muted:#93A49D;
+      --line:#2A3833;
+      --accent:#43BE9E;
+      --accent-soft:#1C3129;
+      --sos:#E0885B;
+      --sos-soft:#33241B;
+      --done:#5C6E67;
+      --shadow:0 1px 3px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#111916; --card:#1A2420; --ink:#E4ECE8; --muted:#93A49D;
+    --line:#2A3833; --accent:#43BE9E; --accent-soft:#1C3129;
+    --sos:#E0885B; --sos-soft:#33241B; --done:#5C6E67;
+    --shadow:0 1px 3px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"]{
+    --paper:#F7FAF8; --card:#FFFFFF; --ink:#1E2B27; --muted:#5B6B65;
+    --line:#DEE7E2; --accent:#0E7C66; --accent-soft:#E3F1EC;
+    --sos:#B4532A; --sos-soft:#F9EDE5; --done:#8FA69E;
+    --shadow:0 1px 3px rgba(30,43,39,.08);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    line-height:1.55; margin:0; padding:16px 14px 48px;
+  }
+  .wrap{max-width:680px; margin:0 auto; display:flex; flex-direction:column; gap:22px}
+
+  header .eyebrow{
+    font-size:.72rem; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--accent); font-weight:700; margin:0 0 4px;
+  }
+  header h1{font-size:1.5rem; margin:0; text-wrap:balance; line-height:1.25}
+  header .today{color:var(--muted); font-size:.9rem; margin:6px 0 0}
+
+  .progress{
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    box-shadow:var(--shadow); padding:14px 16px; display:flex; flex-direction:column; gap:8px;
+  }
+  .progress .row{display:flex; justify-content:space-between; align-items:baseline; gap:12px}
+  .progress .count{font-weight:800; font-size:1.05rem; font-variant-numeric:tabular-nums}
+  .bar{height:8px; border-radius:99px; background:var(--line); overflow:hidden}
+  .bar > div{height:100%; width:0%; background:var(--accent); border-radius:99px; transition:width .3s}
+  @media (prefers-reduced-motion: reduce){ .bar > div{transition:none} }
+
+  .note-box{
+    background:var(--accent-soft); border:1px solid var(--line); border-radius:12px;
+    padding:12px 16px; font-size:.92rem; margin-top:14px;
+  }
+  .note-box strong{color:var(--accent)}
+
+  h2{font-size:1.02rem; margin:0 0 2px; display:flex; align-items:center; gap:8px}
+  h2 .tag{
+    font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; font-weight:700;
+    color:var(--muted);
+  }
+  .section-sub{color:var(--muted); font-size:.86rem; margin:0 0 12px}
+
+  /* ---- Timeline ---- */
+  .timeline{display:flex; flex-direction:column; gap:10px}
+  .slot{display:grid; grid-template-columns:64px 1fr; gap:10px; align-items:stretch}
+  .slot .hour{
+    font-weight:800; font-variant-numeric:tabular-nums; color:var(--accent);
+    font-size:1.02rem; padding-top:14px; text-align:right;
+  }
+  .slot .hour small{display:block; font-weight:600; font-size:.66rem; color:var(--muted); letter-spacing:.06em}
+  .slot.sos .hour{color:var(--sos); font-size:.8rem; font-weight:700; padding-top:18px}
+
+  .med{
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    box-shadow:var(--shadow); padding:12px 14px;
+    display:flex; gap:12px; align-items:flex-start;
+  }
+  .slot.sos .med{border:1.5px dashed var(--sos); background:var(--sos-soft); box-shadow:none}
+  .med label{display:flex; gap:12px; align-items:flex-start; cursor:pointer; flex:1}
+  .med input[type=checkbox]{
+    width:24px; height:24px; margin:2px 0 0; flex:none; accent-color:var(--accent); cursor:pointer;
+  }
+  .slot.sos .med input[type=checkbox]{accent-color:var(--sos)}
+  .med .body{flex:1}
+  .med .name{font-weight:700; font-size:.98rem}
+  .med .name .badge{
+    display:inline-block; font-size:.64rem; font-weight:800; letter-spacing:.08em;
+    text-transform:uppercase; border-radius:99px; padding:2px 8px; margin-left:6px;
+    vertical-align:2px; background:var(--accent-soft); color:var(--accent);
+  }
+  .slot.sos .name .badge{background:var(--sos); color:#fff}
+  .med .how{font-size:.86rem; color:var(--muted); margin-top:2px}
+  .med .chip{
+    display:inline-block; margin-top:6px; font-size:.72rem; font-weight:700;
+    font-variant-numeric:tabular-nums; border:1px solid var(--line); border-radius:99px;
+    padding:2px 9px; color:var(--muted);
+  }
+  .med .chip.ok{border-color:var(--accent); color:var(--accent)}
+  .med.finished{opacity:.55}
+  .med.finished .name{text-decoration:line-through; text-decoration-color:var(--done)}
+  .med.notyet{opacity:.5}
+
+  .meal{
+    grid-column:2; color:var(--muted); font-size:.82rem; font-weight:600;
+    padding:2px 4px; letter-spacing:.04em;
+  }
+
+  .checked-card{background:var(--accent-soft)}
+
+  /* ---- Lembretes ---- */
+  .reminder{
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    box-shadow:var(--shadow); padding:16px; display:flex; flex-direction:column; gap:12px;
+  }
+  .reminder .field{display:flex; flex-wrap:wrap; align-items:center; gap:10px; font-size:.92rem}
+  .reminder input[type=date]{
+    font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:8px;
+    background:var(--paper); color:var(--ink);
+  }
+  .btn{
+    font:inherit; font-weight:700; border:0; border-radius:10px; cursor:pointer;
+    background:var(--accent); color:#fff; padding:12px 18px; font-size:.95rem;
+  }
+  .btn:focus-visible, input:focus-visible, .med input:focus-visible{
+    outline:3px solid var(--accent); outline-offset:2px;
+  }
+  .reminder .hint{font-size:.84rem; color:var(--muted); margin:0}
+
+  /* ---- Tabela ---- */
+  .table-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:12px; background:var(--card); box-shadow:var(--shadow)}
+  table{border-collapse:collapse; width:100%; font-size:.86rem; min-width:560px}
+  th,td{padding:10px 12px; text-align:left; vertical-align:top; border-top:1px solid var(--line)}
+  thead th{
+    border-top:0; font-size:.68rem; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--muted); background:var(--paper);
+  }
+  td .generic{color:var(--muted); font-size:.8rem; display:block}
+  .hl td{background:var(--accent-soft)}
+
+  ul.care{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:8px; font-size:.92rem}
+  ul.care li::marker{color:var(--accent)}
+
+  footer{
+    color:var(--muted); font-size:.8rem; border-top:1px solid var(--line); padding-top:14px;
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Pós-operatório · Mastologia</p>
+    <h1>Rotina de medicação — Bruna</h1>
+    <p class="today" id="todayLabel"></p>
+  </header>
+
+  <div class="progress">
+    <div class="row">
+      <span>Doses de hoje</span>
+      <span class="count" id="progressCount">0 / 0</span>
+    </div>
+    <div class="bar"><div id="progressBar"></div></div>
+  </div>
+
+  <section>
+    <h2>Linha do dia <span class="tag">marque conforme for tomando</span></h2>
+    <p class="section-sub">A lista zera sozinha a cada dia. Os cards laranja tracejados são os "só se tiver dor" — não são obrigatórios.
+    <strong>O tratamento começou no meio do domingo 12/07</strong> (Lisador às 15h, injeção às 18h), então no 1º dia os itens
+    da manhã aparecem apagados — eles entram no dia seguinte.</p>
+
+    <div class="timeline" id="timeline">
+
+      <div class="slot">
+        <div class="hour">06:30<small>JEJUM</small></div>
+        <div class="med" data-id="pantoprazol" data-startoff="1">
+          <label>
+            <input type="checkbox">
+            <span class="body">
+              <span class="name">💊 Pantoprazol 40 mg</span>
+              <span class="how">1 comprimido em jejum, 30–40 min antes do café. Protege o estômago dos anti-inflamatórios.</span>
+              <span class="chip" data-dur="10" data-durlabel="enquanto durar o tratamento"></span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="slot">
+        <div class="hour">07:00</div>
+        <div class="meal">☕ Café da manhã</div>
+      </div>
+
+      <div class="slot">
+        <div class="hour">07:30</div>
+        <div class="med" data-id="preni" data-startoff="1">
+          <label>
+            <input type="checkbox">
+            <span class="body">
+              <span class="name">💊 Prednisolona 20 mg <span class="badge">= Preni · a caixa da foto</span></span>
+              <span class="how">1 comprimido após o café da manhã. Corticoide — reduz inflamação e inchaço.</span>
+              <span class="chip" data-dur="5"></span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="slot">
+        <div class="hour">08:00</div>
+        <div class="med" data-id="cefadroxil1" data-startoff="1">
+          <label>
+            <input type="checkbox">
+            <span class="body">
+              <span class="name">💊 Cefadroxil 500 mg — dose 1 de 2</span>
+              <span class="how">1 comprimido. Antibiótico — tomar os 7 dias completos, sem pular, mesmo se sentindo bem.</span>
+              <span class="chip" data-dur="7"></span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="slot">
+        <div class="hour">09:00</div>
+        <div class="med" data-id="lisador1" data-startoff="1">
+          <label>
+            <input type="checkbox">
+            <span class="body">
+              <span class="name">💊 Lisador — 4ª dose (fecha o ciclo)</span>
+              <span class="how">1 comprimido — fecha o ciclo iniciado às 15h do dia anterior. Grade do Lisador: 15h · 21h · 03h · 09h.</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="slot sos">
+        <div class="hour">SE DOR</div>
+        <div class="med" data-id="tormiv">
+          <label>
+            <input type="checkbox">
+            <span class="body">
+              <span class="name">💊 Tormiv ou Syndulor 10 mg <span class="badge">só se tiver dor</span></span>
+              <span class="how">1 comprimido <strong>debaixo da língua</strong> quando a dor apertar apesar do Lisador.
+              Mínimo de 8h entre doses (máx. 3×/dia) e <strong>no máximo 5 dias</strong>.</span>
+              <span class="chip" data-dur="5" data-durlabel="janela máx. de uso"></span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="slot">
+        <div class="hour">15:00</div>
+        <div class="med" data-id="lisador2">
+          <label>
+            <input type="checkbox">
+            <span class="body">
+              <span class="name">💊 Lisador — 1ª dose (início do ciclo)</span>
+              <span class="how">1 comprimido. O ciclo diário do Lisador começa aqui — foi a 1ª dose do tratamento (domingo 12/07, 15h).</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="slot">
+        <div class="hour">18:00</div>
+        <div class="med" data-id="enoxaparina">
+          <label>
+            <input type="checkbox">
+            <span class="body">
+              <span class="name">💉 Injeção — enoxaparina 40 mg (Versa/Heparinoxi)</span>
+              <span class="how">1 ampola subcutânea (barriga), sempre às 18h. Previne trombose.
+              Alterne o lado a cada dia e não esfregue o local depois.</span>
+              <span class="chip" data-dur="8"></span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="slot">
+        <div class="hour">20:00</div>
+        <div class="med" data-id="cefadroxil2">
+          <label>
+            <input type="checkbox">
+            <span class="body">
+              <span class="name">💊 Cefadroxil 500 mg — dose 2 de 2</span>
+              <span class="how">1 comprimido.</span>
+              <span class="chip" data-dur="7"></span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="slot">
+        <div class="hour">21:00</div>
+        <div class="med" data-id="lisador3">
+          <label>
+            <input type="checkbox">
+            <span class="body">
+              <span class="name">💊 Lisador — 2ª dose</span>
+              <span class="how">1 comprimido (6h após a dose das 15h).</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="slot">
+        <div class="hour">~21:30<small>BANHO</small></div>
+        <div class="med" data-id="curativo">
+          <label>
+            <input type="checkbox">
+            <span class="body">
+              <span class="name">🩹 Curativo — Soapex + Dersani</span>
+              <span class="how">No banho: lavar a lesão com Soapex, secar, passar o Dersani e proteger as cicatrizes com gaze e micropore.</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="slot sos">
+        <div class="hour">SE DOR<small>FORTE</small></div>
+        <div class="med" data-id="miosan">
+          <label>
+            <input type="checkbox">
+            <span class="body">
+              <span class="name">💊 Miosan ou Mirtax 10 mg <span class="badge">só se dor forte</span></span>
+              <span class="how">1 comprimido de 12/12h <strong>se a dor for forte ou persistente</strong>. Relaxante muscular —
+              dá muito sono: prefira à noite e não dirija depois de tomar.</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="slot">
+        <div class="hour">03:00</div>
+        <div class="med" data-id="lisador4">
+          <label>
+            <input type="checkbox">
+            <span class="body">
+              <span class="name">💊 Lisador — 3ª dose (madrugada)</span>
+              <span class="how">6h após a dose das 21h. A receita pede 6/6h certinho — se a dor estiver controlada,
+              pergunte ao médico se pode pular a madrugada e retomar às 09h, em vez de acordar. Não decida por conta própria.</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>💊 O que é cada um <span class="tag">e o nome que pode vir na caixa</span></h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Na receita</th><th>Na caixa da farmácia</th><th>Para que serve</th><th>Duração</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Lisador</strong></td><td>Lisador <span class="generic">(dipirona + associações)</span></td><td>Analgésico de base para a dor, uso contínuo</td><td>6/6h</td></tr>
+          <tr><td><strong>Tormiv / Syndulor 10 mg</strong></td><td>cetorolaco de trometamol 10 mg <span class="generic">sublingual</span></td><td>Anti-inflamatório "SOS" para dor mais forte</td><td>máx. 5 dias</td></tr>
+          <tr><td><strong>Miosan / Mirtax 10 mg</strong></td><td>ciclobenzaprina 10 mg</td><td>Relaxante muscular (dor forte/persistente). Dá sono</td><td>se precisar</td></tr>
+          <tr><td><strong>Pantoprazol 40 mg</strong></td><td>pantoprazol 40 mg</td><td>Protetor do estômago</td><td>1×/dia jejum</td></tr>
+          <tr><td><strong>Cefadroxil 500 mg</strong></td><td>cefadroxil 500 mg</td><td>Antibiótico — previne infecção da cirurgia</td><td>7 dias</td></tr>
+          <tr class="hl"><td><strong>Preni 20 mg</strong></td><td><strong>prednisolona 20 mg</strong> <span class="generic">✔ a caixa da foto (Eurofarma)</span></td><td>Corticoide — inflamação e inchaço</td><td>5 dias</td></tr>
+          <tr><td><strong>Versa / Heparinoxi 40 mg</strong></td><td>enoxaparina sódica 40 mg <span class="generic">seringa/ampola</span></td><td>Anticoagulante injetável — previne trombose</td><td>8 dias, 18h</td></tr>
+          <tr><td><strong>Dersani</strong></td><td>Dersani <span class="generic">(óleo cicatrizante AGE)</span></td><td>Cuidado local da ferida no banho</td><td>diário</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note-box">
+      📦 <strong>A caixa "prednisolona 20 mg" (Eurofarma) é o Preni da receita.</strong>
+      A farmácia entregou o genérico — mesmo remédio, mesmo uso. Os outros também podem vir com o
+      nome genérico na caixa; é só conferir pela tabela acima.
+    </div>
+  </section>
+
+  <section>
+    <h2>⚠️ Cuidados importantes</h2>
+    <ul class="care">
+      <li><strong>Evite álcool</strong> durante todo o tratamento (interage com Lisador, Miosan e o antibiótico).</li>
+      <li>O pantoprazol de manhã existe justamente para proteger o estômago do cetorolaco e do corticoide — <strong>não pule</strong>.</li>
+      <li>Injeção: alterne o lado da barriga a cada dia; não esfregue o local depois de aplicar.</li>
+      <li><strong>Procure o médico se aparecer:</strong> febre, vermelhidão/calor/secreção na ferida, sangramento,
+      ou dor/inchaço na perna (importante pelo risco de trombose).</li>
+    </ul>
+  </section>
+
+  <footer>
+    Organização baseada na receita médica pós-operatória.
+    Este resumo não substitui orientação médica — em caso de dúvida, confirme com o médico ou farmacêutico.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  // ---------- datas ----------
+  function localISO(d){
+    var y=d.getFullYear(), m=('0'+(d.getMonth()+1)).slice(-2), day=('0'+d.getDate()).slice(-2);
+    return y+'-'+m+'-'+day;
+  }
+  var today = new Date();
+  var todayKey = localISO(today);
+
+  var fmt = new Intl.DateTimeFormat('pt-BR',{weekday:'long', day:'numeric', month:'long'});
+  document.getElementById('todayLabel').textContent =
+    'Hoje: ' + fmt.format(today).replace(/^./, function(c){return c.toUpperCase();});
+
+  // ---------- data de início (fixa: tratamento começou domingo 12/07/2026) ----------
+  var START = '2026-07-12';
+
+  function dayNumber(){
+    var s = new Date(START + 'T00:00:00');
+    var t = new Date(todayKey + 'T00:00:00');
+    return Math.floor((t - s) / 86400000) + 1; // dia 1 = data de início
+  }
+
+  // ---------- chips "dia X de Y" + itens que só começam no dia seguinte ----------
+  // data-startoff="1" = remédio de manhã que só entra no 2º dia (tratamento começou às 18h)
+  function renderChips(){
+    var n = dayNumber();
+
+    document.querySelectorAll('.med[data-startoff]').forEach(function(card){
+      var off = parseInt(card.dataset.startoff, 10);
+      var notyet = (n - off) < 1;
+      card.classList.toggle('notyet', notyet);
+      var note = card.querySelector('.startnote');
+      if (notyet){
+        if (!note){
+          note = document.createElement('span');
+          note.className = 'chip startnote';
+          card.querySelector('.body').appendChild(note);
+        }
+        note.textContent = (n - off === 0) ? 'começa amanhã de manhã' : 'ainda não começou';
+        note.style.display = '';
+      } else if (note){
+        note.style.display = 'none';
+      }
+    });
+
+    document.querySelectorAll('.chip[data-dur]').forEach(function(chip){
+      var dur = parseInt(chip.dataset.dur, 10);
+      var label = chip.dataset.durlabel;
+      var card = chip.closest('.med');
+      var off = parseInt(card.dataset.startoff || '0', 10);
+      var eff = n - off; // dia efetivo desse remédio
+      card.classList.remove('finished');
+      if (eff < 1){
+        chip.style.display = 'none'; // o startnote explica
+        chip.classList.remove('ok');
+        return;
+      }
+      chip.style.display = '';
+      if (eff > dur){
+        chip.textContent = 'período de ' + dur + ' dias concluído ✓';
+        chip.classList.add('ok');
+        if (!card.closest('.slot').classList.contains('sos')) card.classList.add('finished');
+      } else {
+        chip.textContent = 'dia ' + eff + ' de ' + dur + (label ? ' · '+label : '');
+        chip.classList.remove('ok');
+      }
+    });
+    updateProgress();
+  }
+
+  // ---------- checklist do dia (zera a cada dia) ----------
+  var storeKey = 'med_check_' + todayKey;
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(storeKey) || '{}'); } catch(e){ state = {}; }
+
+  // A dose das 15h do Lisador de 12/07 já foi tomada — vem marcada por padrão no 1º dia.
+  if (todayKey === '2026-07-12' && state.lisador2 === undefined){
+    state.lisador2 = true;
+    try { localStorage.setItem(storeKey, JSON.stringify(state)); } catch(e){}
+  }
+  // limpa dias antigos
+  try {
+    Object.keys(localStorage).forEach(function(k){
+      if (k.indexOf('med_check_') === 0 && k !== storeKey) localStorage.removeItem(k);
+    });
+  } catch(e){}
+
+  var cards = document.querySelectorAll('.med[data-id]');
+  cards.forEach(function(card){
+    var id = card.dataset.id;
+    var cb = card.querySelector('input[type=checkbox]');
+    cb.checked = !!state[id];
+    card.classList.toggle('checked-card', cb.checked && !card.closest('.slot').classList.contains('sos'));
+    cb.addEventListener('change', function(){
+      state[id] = cb.checked;
+      try { localStorage.setItem(storeKey, JSON.stringify(state)); } catch(e){}
+      card.classList.toggle('checked-card', cb.checked && !card.closest('.slot').classList.contains('sos'));
+      updateProgress();
+    });
+  });
+
+  function updateProgress(){
+    var total = 0, done = 0;
+    cards.forEach(function(card){
+      if (card.closest('.slot').classList.contains('sos')) return; // SOS não conta
+      if (card.classList.contains('finished')) return;             // tratamento já encerrado
+      if (card.classList.contains('notyet')) return;               // ainda não começou (dia 1 às 18h)
+      total++;
+      if (card.querySelector('input').checked) done++;
+    });
+    document.getElementById('progressCount').textContent = done + ' / ' + total;
+    document.getElementById('progressBar').style.width = (total ? Math.round(done/total*100) : 0) + '%';
+  }
+
+  renderChips();
+})();
+</script>
+</body></html>
