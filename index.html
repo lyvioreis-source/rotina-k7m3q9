@@ -227,12 +227,12 @@
 
       <div class="slot">
         <div class="hour">07:00</div>
-        <div class="med" data-id="miosan1" data-time="07:00">
+        <div class="med" data-id="synd1" data-time="07:00">
           <label>
             <input type="checkbox">
             <span class="body">
-              <span class="name">💊 Miosan ou Mirtax 10 mg <span class="badge">novo · 8/8h</span></span>
-              <span class="how">1 comprimido (relaxante muscular, de 8 em 8 horas: 07h · 15h · 23h). Dá sono — evite dirigir depois de tomar.</span>
+              <span class="name">💊 Syndulor ou Tormiv 10 mg <span class="badge">sublingual · 8/8h</span></span>
+              <span class="how">1 comprimido <strong>debaixo da língua</strong> (8/8h: 07h · 15h · 23h). Anti-inflamatório para a dor.</span>
             </span>
           </label>
         </div>
@@ -280,15 +280,14 @@
       </div>
 
       <div class="slot sos">
-        <div class="hour">SE DOR</div>
-        <div class="med" data-id="tormiv">
+        <div class="hour">SE DOR<small>FORTE</small></div>
+        <div class="med" data-id="miosan">
           <label>
             <input type="checkbox">
             <span class="body">
-              <span class="name">💊 Tormiv ou Syndulor 10 mg <span class="badge">só se tiver dor</span></span>
-              <span class="how">1 comprimido <strong>debaixo da língua</strong> quando a dor apertar apesar do Lisador.
-              Mínimo de 8h entre doses (máx. 3×/dia) e <strong>no máximo 5 dias</strong>.</span>
-              <span class="chip" data-dur="5" data-durlabel="janela máx. de uso"></span>
+              <span class="name">💊 Miosan ou Mirtax 10 mg <span class="badge">só se muita dor</span></span>
+              <span class="how">1 comprimido de 12/12h <strong>só em caso de dor forte ou persistente</strong>. Relaxante muscular —
+              dá muito sono: prefira à noite e não dirija depois de tomar.</span>
             </span>
           </label>
         </div>
@@ -309,12 +308,12 @@
 
       <div class="slot">
         <div class="hour">15:00</div>
-        <div class="med" data-id="miosan2" data-time="15:00">
+        <div class="med" data-id="synd2" data-time="15:00">
           <label>
             <input type="checkbox">
             <span class="body">
-              <span class="name">💊 Miosan ou Mirtax 10 mg</span>
-              <span class="how">1 comprimido (8/8h). Pode tomar junto com o Lisador das 15h. Dá sono.</span>
+              <span class="name">💊 Syndulor ou Tormiv 10 mg (sublingual)</span>
+              <span class="how">1 comprimido sublingual (8/8h). Pode tomar junto com o Lisador das 15h.</span>
             </span>
           </label>
         </div>
@@ -377,12 +376,12 @@
 
       <div class="slot">
         <div class="hour">23:00</div>
-        <div class="med" data-id="miosan3" data-time="23:00">
+        <div class="med" data-id="synd3" data-time="23:00">
           <label>
             <input type="checkbox">
             <span class="body">
-              <span class="name">💊 Miosan ou Mirtax 10 mg</span>
-              <span class="how">1 comprimido (8/8h) — última do dia, na hora de dormir (ajuda no sono). Ciclo: 07h · 15h · 23h.</span>
+              <span class="name">💊 Syndulor ou Tormiv 10 mg (sublingual)</span>
+              <span class="how">1 comprimido sublingual (8/8h) — última do dia. Ciclo: 07h · 15h · 23h.</span>
             </span>
           </label>
         </div>
@@ -414,8 +413,8 @@
         </thead>
         <tbody>
           <tr><td><strong>Lisador</strong></td><td>Lisador <span class="generic">(dipirona + associações)</span></td><td>Analgésico de base para a dor, uso contínuo</td><td>6/6h</td></tr>
-          <tr><td><strong>Tormiv / Syndulor 10 mg</strong></td><td>cetorolaco de trometamol 10 mg <span class="generic">sublingual</span></td><td>Anti-inflamatório "SOS" para dor mais forte</td><td>máx. 5 dias</td></tr>
-          <tr><td><strong>Miosan / Mirtax 10 mg</strong></td><td>ciclobenzaprina 10 mg</td><td>Relaxante muscular. Dá sono — evite dirigir</td><td>8/8h (07·15·23h)</td></tr>
+          <tr><td><strong>Syndulor / Tormiv 10 mg</strong></td><td>cetorolaco de trometamol 10 mg <span class="generic">sublingual</span></td><td>Anti-inflamatório (sublingual) para a dor</td><td>8/8h (07·15·23h)</td></tr>
+          <tr><td><strong>Miosan / Mirtax 10 mg</strong></td><td>ciclobenzaprina 10 mg</td><td>Relaxante muscular (só se muita dor). Dá sono — evite dirigir</td><td>se precisar (12/12h)</td></tr>
           <tr><td><strong>Pantoprazol 40 mg</strong></td><td>pantoprazol 40 mg</td><td>Protetor do estômago</td><td>1×/dia jejum</td></tr>
           <tr><td><strong>Cefadroxil 500 mg</strong></td><td>cefadroxil 500 mg</td><td>Antibiótico — previne infecção da cirurgia</td><td>7 dias</td></tr>
           <tr class="hl"><td><strong>Preni 20 mg</strong></td><td><strong>prednisolona 20 mg</strong> <span class="generic">✔ a caixa da foto (Eurofarma)</span></td><td>Corticoide — inflamação e inchaço</td><td>5 dias</td></tr>
@@ -476,29 +475,29 @@
 
   // ---------- chips "dia X de Y" + itens que só começam no dia seguinte ----------
   // data-startoff="1" = remédio de manhã que só entra no 2º dia (tratamento começou às 18h)
-  // Miosan: caixa de 10 comprimidos, 8/8h (07·15·23h), iniciada em 13/07.
+  // Syndulor/Tormiv (sublingual): caixa de 10 comprimidos, 8/8h (07·15·23h), iniciada em 13/07.
   // A conta da caixa manda: encerra sozinho no 10º comprimido (16/07 de manhã).
-  var MIO = { start:'2026-07-13', total:10, order:{ miosan1:0, miosan2:1, miosan3:2 } };
+  var SYND = { start:'2026-07-13', total:10, order:{ synd1:0, synd2:1, synd3:2 } };
   function daysDiff(fromISO, toISO){
     return Math.floor((new Date(toISO+'T00:00:00') - new Date(fromISO+'T00:00:00')) / 86400000);
   }
-  function renderMiosan(){
-    var mioDay = daysDiff(MIO.start, todayKey);
-    ['miosan1','miosan2','miosan3'].forEach(function(id){
+  function renderSyndulor(){
+    var sDay = daysDiff(SYND.start, todayKey);
+    ['synd1','synd2','synd3'].forEach(function(id){
       var card = document.querySelector('.med[data-id="'+id+'"]');
       if (!card) return;
       var body = card.querySelector('.body');
-      var chip = body.querySelector('.miosan-chip');
-      if (!chip){ chip = document.createElement('span'); chip.className = 'chip miosan-chip'; body.appendChild(chip); }
+      var chip = body.querySelector('.synd-chip');
+      if (!chip){ chip = document.createElement('span'); chip.className = 'chip synd-chip'; body.appendChild(chip); }
       card.classList.remove('notyet','finished');
-      if (mioDay < 0){ card.classList.add('notyet'); chip.textContent = 'começa 13/07'; chip.classList.remove('ok'); return; }
-      var seq = mioDay*3 + MIO.order[id] + 1;
-      if (seq > MIO.total){
+      if (sDay < 0){ card.classList.add('notyet'); chip.textContent = 'começa 13/07'; chip.classList.remove('ok'); return; }
+      var seq = sDay*3 + SYND.order[id] + 1;
+      if (seq > SYND.total){
         card.classList.add('finished');
         chip.textContent = 'caixa de 10 concluída ✓';
         chip.classList.add('ok');
       } else {
-        chip.textContent = 'comprimido ' + seq + ' de 10' + (seq === MIO.total ? ' · última da caixa' : '');
+        chip.textContent = 'comprimido ' + seq + ' de 10' + (seq === SYND.total ? ' · última da caixa' : '');
         chip.classList.remove('ok');
       }
     });
@@ -506,7 +505,7 @@
 
   function renderChips(){
     var n = dayNumber();
-    renderMiosan();
+    renderSyndulor();
 
     document.querySelectorAll('.med[data-startoff]').forEach(function(card){
       var off = parseInt(card.dataset.startoff, 10);
