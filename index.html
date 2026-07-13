@@ -671,6 +671,22 @@
 
   checkDue();
   setInterval(checkDue, 30000);
+
+  // ---------- Auto-refresh (mantém a página atual sem recarregar na mão) ----------
+  // Recarrega quando: (a) virou o dia à meia-noite, ou (b) a pessoa reabre a página
+  // depois de um tempo (pega os horários novos e qualquer atualização publicada).
+  // NÃO recarrega à toa enquanto está lendo — evita "piscar".
+  var loadedDay = todayKey;
+  var loadedAt = Date.now();
+  function freshenIfNeeded(){
+    var nowDay = localISO(new Date());
+    var minutosAberta = (Date.now() - loadedAt) / 60000;
+    if (nowDay !== loadedDay || minutosAberta > 15){ location.reload(); }
+  }
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) freshenIfNeeded(); });
+  window.addEventListener('focus', freshenIfNeeded);
+  // enquanto fica aberta, checa a cada minuto se passou da meia-noite
+  setInterval(function(){ if (localISO(new Date()) !== loadedDay){ location.reload(); } }, 60000);
 })();
 </script>
 </body></html>
