@@ -135,6 +135,19 @@
   .med.due{ border-color:var(--sos); box-shadow:0 0 0 2px var(--sos) inset; }
   @media (prefers-reduced-motion: reduce){ .due-alert.pulse{ animation:none; } }
 
+  /* ---- Consultas / retornos ---- */
+  .appts{ display:flex; flex-direction:column; gap:10px; }
+  .appt{ background:var(--card); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); padding:12px 14px; display:flex; gap:12px; align-items:flex-start; }
+  .appt .cal{ font-size:1.5rem; line-height:1; }
+  .appt .info{ flex:1; }
+  .appt .when{ font-weight:800; font-variant-numeric:tabular-nums; }
+  .appt .who{ color:var(--muted); font-size:.92rem; margin-top:2px; }
+  .appt .tag2{ display:inline-block; font-size:.66rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; border-radius:99px; padding:2px 9px; margin-top:7px; background:var(--accent-soft); color:var(--accent); }
+  .appt.today2{ border-color:var(--sos); box-shadow:0 0 0 2px var(--sos) inset; }
+  .appt.today2 .tag2{ background:var(--sos); color:#fff; }
+  .appt.past{ opacity:.5; }
+  .appt.past .when{ text-decoration:line-through; }
+
   .meal{
     grid-column:2; color:var(--muted); font-size:.82rem; font-weight:600;
     padding:2px 4px; letter-spacing:.04em;
@@ -291,6 +304,19 @@
         </div>
       </div>
 
+      <div class="slot">
+        <div class="hour">10:30<small>BANHO</small></div>
+        <div class="med" data-id="curativo" data-startoff="3" data-time="10:30">
+          <label>
+            <input type="checkbox">
+            <span class="body">
+              <span class="name">🩹 Curativo — Soapex + Dersani</span>
+              <span class="how">No banho da manhã: lavar a lesão com Soapex, secar, passar o Dersani e proteger as cicatrizes com gaze e micropore.</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
       <div class="slot sos">
         <div class="hour">SE DOR<small>FORTE</small></div>
         <div class="med" data-id="miosan">
@@ -387,19 +413,6 @@
       </div>
 
       <div class="slot">
-        <div class="hour">~21:30<small>BANHO</small></div>
-        <div class="med" data-id="curativo" data-time="21:30">
-          <label>
-            <input type="checkbox">
-            <span class="body">
-              <span class="name">🩹 Curativo — Soapex + Dersani</span>
-              <span class="how">No banho: lavar a lesão com Soapex, secar, passar o Dersani e proteger as cicatrizes com gaze e micropore.</span>
-            </span>
-          </label>
-        </div>
-      </div>
-
-      <div class="slot">
         <div class="hour">22:00</div>
         <div class="med" data-id="tram22" data-time="22:00">
           <label>
@@ -439,6 +452,11 @@
       </div>
 
     </div>
+  </section>
+
+  <section>
+    <h2>📅 Consultas e retornos</h2>
+    <div class="appts" id="apptList"></div>
   </section>
 
   <section>
@@ -651,6 +669,30 @@
     }catch(e){}
   }
 
+  // ---------- Consultas / retornos ----------
+  var APPTS = [
+    { date:'2026-07-17', time:'13:15', who:'Retorno — Dr. Tadeu (mastologista)' },
+    { date:'2026-07-20', time:'14:30', who:'Dr. Alexandre (cirurgião plástico)' }
+  ];
+  function renderAppts(){
+    var list = document.getElementById('apptList');
+    if (!list) return;
+    var futuras = APPTS.filter(function(a){ return a.date >= todayKey; });
+    var nextDate = futuras.length ? futuras[0].date : null;
+    list.innerHTML = APPTS.map(function(a){
+      var d = new Date(a.date + 'T12:00:00');
+      var wd = new Intl.DateTimeFormat('pt-BR', { weekday:'long', day:'2-digit', month:'2-digit' }).format(d);
+      wd = wd.charAt(0).toUpperCase() + wd.slice(1);
+      var past = a.date < todayKey, hoje = a.date === todayKey, isNext = a.date === nextDate;
+      var cls = past ? 'past' : (hoje ? 'today2' : '');
+      var tag = past ? '<span class="tag2">realizada</span>'
+              : (hoje ? '<span class="tag2">Hoje!</span>' : (isNext ? '<span class="tag2">Próxima</span>' : ''));
+      return '<div class="appt ' + cls + '"><span class="cal">📅</span><span class="info">' +
+             '<div class="when">' + wd + ' · ' + a.time + '</div>' +
+             '<div class="who">' + a.who + '</div>' + tag + '</span></div>';
+    }).join('');
+  }
+
   function checkDue(){
     var now = new Date();
     var nowMin = now.getHours()*60 + now.getMinutes();
@@ -671,26 +713,39 @@
         card.classList.remove('due');
       }
     });
-    renderAlert(nowMin, due);
+    // consulta de hoje: alerta de 1h antes até 1h30 depois do horário
+    var appt = null;
+    APPTS.forEach(function(a){
+      if (a.date !== todayKey) return;
+      var p = a.time.split(':'), amin = (+p[0])*60 + (+p[1]);
+      if (nowMin >= amin - 60 && nowMin <= amin + 90){ appt = { time:a.time, who:a.who }; }
+    });
+    renderAlert(nowMin, due, appt);
   }
 
-  function renderAlert(nowMin, due){
+  function renderAlert(nowMin, due, appt){
     var banner = document.getElementById('dueAlert');
-    if (!due.length){ banner.style.display='none'; banner.classList.remove('pulse'); prevDueKey=''; return; }
-    due.sort(function(a,b){ return a.min - b.min; });
-    var itens = due.map(function(d){
-      var atraso = nowMin - d.min;
-      var quando = atraso >= 1 ? ' — atrasado ' + atraso + ' min'
-                 : (atraso < 0 ? ' — em ' + (-atraso) + ' min' : ' — agora');
-      return '<div>• ' + d.label + ' <span class="t">' + d.t + '</span>' + quando + '</div>';
-    }).join('');
-    banner.innerHTML =
-      '<div class="da-title">⏰ ' + (due.length===1 ? 'Hora do remédio' : 'Hora de ' + due.length + ' remédios') + '</div>' +
-      '<div class="da-list">' + itens + '</div>' +
-      '<div class="da-hint">Marque na lista abaixo quando tomar — o aviso some sozinho.</div>';
+    if (!due.length && !appt){ banner.style.display='none'; banner.classList.remove('pulse'); prevDueKey=''; return; }
+    var html = '';
+    if (appt){
+      html += '<div class="da-title">📅 Consulta hoje — ' + appt.time + '</div><div class="da-list">' + appt.who + '</div>';
+    }
+    if (due.length){
+      due.sort(function(a,b){ return a.min - b.min; });
+      var itens = due.map(function(d){
+        var atraso = nowMin - d.min;
+        var quando = atraso >= 1 ? ' — atrasado ' + atraso + ' min'
+                   : (atraso < 0 ? ' — em ' + (-atraso) + ' min' : ' — agora');
+        return '<div>• ' + d.label + ' <span class="t">' + d.t + '</span>' + quando + '</div>';
+      }).join('');
+      html += '<div class="da-title">⏰ ' + (due.length===1 ? 'Hora do remédio' : 'Hora de ' + due.length + ' remédios') + '</div>' +
+        '<div class="da-list">' + itens + '</div>' +
+        '<div class="da-hint">Marque na lista abaixo quando tomar — o aviso some sozinho.</div>';
+    }
+    banner.innerHTML = html;
     banner.style.display = '';
     banner.classList.add('pulse');
-    var key = due.map(function(d){ return d.label; }).join('|');
+    var key = (appt ? 'ap' + appt.time + '|' : '') + due.map(function(d){ return d.label; }).join('|');
     if (key !== prevDueKey){
       try{ if (navigator.vibrate) navigator.vibrate([250,120,250]); }catch(e){}
       beep();
@@ -704,6 +759,7 @@
     document.removeEventListener('click', unlock);
   }, { once:true });
 
+  renderAppts();
   checkDue();
   setInterval(checkDue, 30000);
 
