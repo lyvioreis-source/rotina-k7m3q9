@@ -200,11 +200,23 @@
 
   <section>
     <h2>Linha do dia <span class="tag">marque conforme for tomando</span></h2>
-    <p class="section-sub">A lista zera sozinha a cada dia. Os cards laranja tracejados são os "só se tiver dor" — não são obrigatórios.
-    <strong>O tratamento começou no meio do domingo 12/07</strong> (Lisador às 15h, injeção às 18h), então no 1º dia os itens
-    da manhã aparecem apagados — eles entram no dia seguinte.</p>
+    <p class="section-sub">A lista zera sozinha a cada dia e mostra a rotina completa. Os cards laranja tracejados são os "só se dor"
+    (não obrigatórios). Itens apagados com "começa amanhã" são doses novas que entram a partir do dia seguinte.</p>
 
     <div class="timeline" id="timeline">
+
+      <div class="slot">
+        <div class="hour">06:00</div>
+        <div class="med" data-id="tram06" data-startoff="3" data-time="06:00">
+          <label>
+            <input type="checkbox">
+            <span class="body">
+              <span class="name">💊 Tramal 50 mg</span>
+              <span class="how">1 cápsula (tramadol) até de 8/8h — se a dor pedir. Grade: 06·14·22h.</span>
+            </span>
+          </label>
+        </div>
+      </div>
 
       <div class="slot">
         <div class="hour">06:30<small>JEJUM</small></div>
@@ -239,19 +251,6 @@
       </div>
 
       <div class="slot">
-        <div class="hour">07:00</div>
-        <div class="med" data-id="lis07" data-startoff="2" data-time="07:00">
-          <label>
-            <input type="checkbox">
-            <span class="body">
-              <span class="name">💊 Lisador</span>
-              <span class="how">1 comprimido (4/4h). Grade: 03·07·11·15·19·23h.</span>
-            </span>
-          </label>
-        </div>
-      </div>
-
-      <div class="slot">
         <div class="hour">07:30</div>
         <div class="med" data-id="preni" data-startoff="1" data-time="07:30">
           <label>
@@ -280,13 +279,13 @@
       </div>
 
       <div class="slot">
-        <div class="hour">11:00</div>
-        <div class="med" data-id="lis11" data-time="11:00">
+        <div class="hour">09:00</div>
+        <div class="med" data-id="lis09" data-startoff="3" data-time="09:00">
           <label>
             <input type="checkbox">
             <span class="body">
-              <span class="name">💊 Lisador <span class="badge">novo horário · 4/4h</span></span>
-              <span class="how">1 comprimido. A partir de hoje o Lisador é de <strong>4 em 4 horas</strong> — grade: 03·07·11·15·19·23h. Esta é a 1ª dose do novo ritmo.</span>
+              <span class="name">💊 Lisador</span>
+              <span class="how">1 comprimido. Voltou para 6/6h — grade: 03·09·15·21h.</span>
             </span>
           </label>
         </div>
@@ -307,13 +306,26 @@
       </div>
 
       <div class="slot">
+        <div class="hour">14:00</div>
+        <div class="med" data-id="tram14" data-time="14:00">
+          <label>
+            <input type="checkbox">
+            <span class="body">
+              <span class="name">💊 Tramal 50 mg <span class="badge">novo · até 8/8h</span></span>
+              <span class="how">1 cápsula (tramadol) para dor forte, até de 8/8h (06·14·22h). Opioide — dá sono/tontura/enjoo: não dirija.</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="slot">
         <div class="hour">15:00</div>
         <div class="med" data-id="lis15" data-time="15:00">
           <label>
             <input type="checkbox">
             <span class="body">
               <span class="name">💊 Lisador</span>
-              <span class="how">1 comprimido (4/4h). Pode tomar junto com o Syndulor das 15h.</span>
+              <span class="how">1 comprimido (6/6h). Pode tomar junto com o Syndulor das 15h.</span>
             </span>
           </label>
         </div>
@@ -348,19 +360,6 @@
       </div>
 
       <div class="slot">
-        <div class="hour">19:00</div>
-        <div class="med" data-id="lis19" data-time="19:00">
-          <label>
-            <input type="checkbox">
-            <span class="body">
-              <span class="name">💊 Lisador</span>
-              <span class="how">1 comprimido (4/4h).</span>
-            </span>
-          </label>
-        </div>
-      </div>
-
-      <div class="slot">
         <div class="hour">20:00</div>
         <div class="med" data-id="cefadroxil2" data-time="20:00">
           <label>
@@ -369,6 +368,19 @@
               <span class="name">💊 Cefadroxil 500 mg — dose 2 de 2</span>
               <span class="how">1 comprimido.</span>
               <span class="chip" data-dur="7"></span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="slot">
+        <div class="hour">21:00</div>
+        <div class="med" data-id="lis21" data-time="21:00">
+          <label>
+            <input type="checkbox">
+            <span class="body">
+              <span class="name">💊 Lisador</span>
+              <span class="how">1 comprimido (6/6h).</span>
             </span>
           </label>
         </div>
@@ -388,13 +400,13 @@
       </div>
 
       <div class="slot">
-        <div class="hour">23:00</div>
-        <div class="med" data-id="lis23" data-time="23:00">
+        <div class="hour">22:00</div>
+        <div class="med" data-id="tram22" data-time="22:00">
           <label>
             <input type="checkbox">
             <span class="body">
-              <span class="name">💊 Lisador</span>
-              <span class="how">1 comprimido (4/4h). Pode tomar junto com o Syndulor das 23h.</span>
+              <span class="name">💊 Tramal 50 mg</span>
+              <span class="how">1 cápsula (tramadol) até de 8/8h — se a dor pedir. Dá sono: a da noite ajuda a dormir.</span>
             </span>
           </label>
         </div>
@@ -415,12 +427,12 @@
 
       <div class="slot">
         <div class="hour">03:00</div>
-        <div class="med" data-id="lis03" data-startoff="2" data-time="03:00">
+        <div class="med" data-id="lis03" data-startoff="3" data-time="03:00">
           <label>
             <input type="checkbox">
             <span class="body">
               <span class="name">💊 Lisador — madrugada</span>
-              <span class="how">1 comprimido (4/4h). Grade: 03·07·11·15·19·23h.</span>
+              <span class="how">1 comprimido (6/6h). Grade: 03·09·15·21h.</span>
             </span>
           </label>
         </div>
@@ -437,7 +449,8 @@
           <tr><th>Na receita</th><th>Na caixa da farmácia</th><th>Para que serve</th><th>Duração</th></tr>
         </thead>
         <tbody>
-          <tr><td><strong>Lisador</strong></td><td>Lisador <span class="generic">(dipirona + associações)</span></td><td>Analgésico de base para a dor, uso contínuo</td><td>4/4h (03·07·11·15·19·23h)</td></tr>
+          <tr><td><strong>Lisador</strong></td><td>Lisador <span class="generic">(dipirona + associações)</span></td><td>Analgésico de base para a dor, uso contínuo</td><td>6/6h (03·09·15·21h)</td></tr>
+          <tr><td><strong>Tramal 50 mg</strong></td><td>cloridrato de tramadol 50 mg <span class="generic">cápsula (20un)</span></td><td>Analgésico opioide para dor forte. Dá sono/tontura/enjoo</td><td>até 8/8h (06·14·22h)</td></tr>
           <tr><td><strong>Syndulor / Tormiv 10 mg</strong></td><td>cetorolaco de trometamol 10 mg <span class="generic">sublingual</span></td><td>Anti-inflamatório (sublingual) para a dor</td><td>8/8h (07·15·23h)</td></tr>
           <tr><td><strong>Miosan / Mirtax 10 mg</strong></td><td>ciclobenzaprina 10 mg</td><td>Relaxante muscular (só se muita dor). Dá sono — evite dirigir</td><td>se precisar (12/12h)</td></tr>
           <tr><td><strong>Pantoprazol 40 mg</strong></td><td>pantoprazol 40 mg</td><td>Protetor do estômago</td><td>1×/dia jejum</td></tr>
@@ -458,7 +471,8 @@
   <section>
     <h2>⚠️ Cuidados importantes</h2>
     <ul class="care">
-      <li><strong>Evite álcool</strong> durante todo o tratamento (interage com Lisador, Miosan e o antibiótico).</li>
+      <li><strong>Evite álcool</strong> durante todo o tratamento (interage com Lisador, Tramal, Miosan e o antibiótico).</li>
+      <li><strong>Tramal (tramadol)</strong> é analgésico forte: dá sono, tontura e às vezes enjoo — <strong>não dirigir</strong> e cuidado ao levantar. Evite tomar junto com o Miosan sem necessidade (os dois somam o sono).</li>
       <li>O pantoprazol de manhã existe justamente para proteger o estômago do cetorolaco e do corticoide — <strong>não pule</strong>.</li>
       <li>Injeção: alterne o lado da barriga a cada dia; não esfregue o local depois de aplicar.</li>
       <li><strong>Procure o médico se aparecer:</strong> febre, vermelhidão/calor/secreção na ferida, sangramento,
