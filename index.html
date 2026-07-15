@@ -148,6 +148,30 @@
   .appt.past{ opacity:.5; }
   .appt.past .when{ text-decoration:line-through; }
 
+  /* ---- Quando termina / perguntar ---- */
+  .ends{ display:flex; flex-direction:column; gap:8px; }
+  .endrow{
+    background:var(--card); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow);
+    padding:10px 13px; display:flex; justify-content:space-between; align-items:center; gap:12px;
+  }
+  .endrow .info{ flex:1; }
+  .endrow .n{ font-weight:700; font-size:.95rem; }
+  .endrow .r{ color:var(--muted); font-size:.79rem; margin-top:2px; line-height:1.4; }
+  .endrow .r b{ color:var(--ink); }
+  .endrow .d{ text-align:right; white-space:nowrap; }
+  .endrow .dd{ font-weight:800; font-variant-numeric:tabular-nums; font-size:.9rem; }
+  .endrow .left{ font-size:.72rem; color:var(--muted); margin-top:2px; }
+  .endrow.done{ opacity:.55; }
+  .endrow.done .dd{ text-decoration:line-through; }
+  .endrow.today3{ border-color:var(--sos); box-shadow:0 0 0 2px var(--sos) inset; }
+  .endrow.today3 .dd, .endrow.today3 .left{ color:var(--sos); font-weight:700; }
+  .ask-box{
+    margin-top:18px; background:var(--accent-soft); border:1px solid var(--line);
+    border-radius:12px; padding:14px 15px;
+  }
+  .ask-title{ font-weight:800; color:var(--accent); font-size:.96rem; }
+  .ask-sub{ color:var(--muted); font-size:.84rem; margin:5px 0 11px; }
+
   .meal{
     grid-column:2; color:var(--muted); font-size:.82rem; font-weight:600;
     padding:2px 4px; letter-spacing:.04em;
@@ -226,7 +250,7 @@
             <span class="body">
               <span class="name">💊 Pantoprazol 40 mg</span>
               <span class="how">1 comprimido em jejum, 30–40 min antes do café. Protege o estômago dos anti-inflamatórios.</span>
-              <span class="chip" data-dur="10" data-durlabel="enquanto durar o tratamento"></span>
+              <span class="chip">sem prazo na receita — perguntar à médica</span>
             </span>
           </label>
         </div>
@@ -447,6 +471,20 @@
   </section>
 
   <section>
+    <h2>🏁 Quando cada remédio termina</h2>
+    <p class="section-sub">Estes vieram com <strong>quantidade contada na receita</strong> — têm data certa e somem da lista sozinhos.
+    Dá pra conferir pelo simples: acabou a quantidade, acabou o tratamento.</p>
+    <div class="ends" id="endsList"></div>
+
+    <div class="ask-box">
+      <div class="ask-title">❓ Perguntar no retorno — sexta 17/07, Dr. Tadeu</div>
+      <p class="ask-sub">Estes <strong>não têm prazo escrito</strong> em nenhuma das duas receitas. A consulta de sexta cai
+      justamente no dia em que a prednisolona e o Syndulor acabam — é a hora de perguntar o que continua.</p>
+      <div class="ends" id="askList"></div>
+    </div>
+  </section>
+
+  <section>
     <h2>💊 O que é cada um <span class="tag">e o nome que pode vir na caixa</span></h2>
     <div class="table-wrap">
       <table>
@@ -519,36 +557,70 @@
 
   // ---------- chips "dia X de Y" + itens que só começam no dia seguinte ----------
   // data-startoff="1" = remédio de manhã que só entra no 2º dia (tratamento começou às 18h)
-  // Syndulor/Tormiv (sublingual): caixa de 10 comprimidos, 8/8h (07·15·23h), iniciada em 13/07.
-  // A conta da caixa manda: encerra sozinho no 10º comprimido (16/07 de manhã).
-  var SYND = { start:'2026-07-13', total:10, order:{ synd1:0, synd2:1, synd3:2 } };
   function daysDiff(fromISO, toISO){
     return Math.floor((new Date(toISO+'T00:00:00') - new Date(fromISO+'T00:00:00')) / 86400000);
   }
+
+  // Syndulor/Tormiv (cetorolaco): a receita limita a 5 dias. Começou 13/07 -> última 17/07.
+  var SYND_END = '2026-07-17';
   function renderSyndulor(){
-    var sDay = daysDiff(SYND.start, todayKey);
-    ['synd1','synd2','synd3'].forEach(function(id){
+    ['synd13','synd21'].forEach(function(id){
       var card = document.querySelector('.med[data-id="'+id+'"]');
       if (!card) return;
       var body = card.querySelector('.body');
       var chip = body.querySelector('.synd-chip');
       if (!chip){ chip = document.createElement('span'); chip.className = 'chip synd-chip'; body.appendChild(chip); }
-      card.classList.remove('notyet','finished');
-      if (sDay < 0){ card.classList.add('notyet'); chip.textContent = 'começa 13/07'; chip.classList.remove('ok'); return; }
-      var seq = sDay*3 + SYND.order[id] + 1;
-      if (seq > SYND.total){
+      if (todayKey > SYND_END){
         card.classList.add('finished');
-        chip.textContent = 'caixa de 10 concluída ✓';
+        chip.textContent = 'limite de 5 dias concluído ✓';
         chip.classList.add('ok');
       } else {
-        chip.textContent = 'comprimido ' + seq + ' de 10' + (seq === SYND.total ? ' · última da caixa' : '');
+        chip.textContent = 'até sexta 17/07 (máx. 5 dias)';
         chip.classList.remove('ok');
       }
     });
   }
 
+  // ---------- Quando cada remédio termina ----------
+  var ENDS = [
+    { n:'💊 Prednisolona (Preni)', r:'receita: 05 comprimidos · 5 dias', last:'2026-07-17', obs:'última de manhã' },
+    { n:'💊 Syndulor / Tormiv',    r:'receita: "por até 5 dias" (anti-inflamatório forte)', last:'2026-07-17', obs:'' },
+    { n:'💊 Cefadroxil (antibiótico)', r:'receita: 14 comprimidos · 12/12h por 7 dias', last:'2026-07-19', obs:'não pular nenhuma' },
+    { n:'💉 Injeção enoxaparina',  r:'receita: 08 ampolas · 8 dias', last:'2026-07-19', obs:'última às 18h' }
+  ];
+  var ASK = [
+    { n:'💊 Lisador',            r:'receita diz "01 caixa · 6/6h" — <b>sem prazo escrito</b>' },
+    { n:'💊 Tramal',             r:'receita diz "20 cápsulas · até 8/8h" — <b>sem prazo escrito</b>' },
+    { n:'💊 Pantoprazol',        r:'receita diz "01 caixa · 1×/dia" — <b>sem prazo escrito</b>' },
+    { n:'💊 Miosan / Mirtax',    r:'só se muita dor — sem prazo definido' },
+    { n:'🩹 Dersani / curativo', r:'até cicatrizar — o médico libera no retorno' }
+  ];
+  function renderEnds(){
+    var el = document.getElementById('endsList');
+    if (el){
+      el.innerHTML = ENDS.map(function(e){
+        var d = new Date(e.last + 'T12:00:00');
+        var wd = new Intl.DateTimeFormat('pt-BR', { weekday:'short', day:'2-digit', month:'2-digit' }).format(d);
+        var dias = daysDiff(todayKey, e.last);
+        var cls = dias < 0 ? 'done' : (dias === 0 ? 'today3' : '');
+        var left = dias < 0 ? 'concluído ✓' : (dias === 0 ? 'a última é HOJE' : 'faltam ' + dias + (dias === 1 ? ' dia' : ' dias'));
+        return '<div class="endrow ' + cls + '"><span class="info"><div class="n">' + e.n + '</div>' +
+               '<div class="r">' + e.r + (e.obs ? ' · ' + e.obs : '') + '</div></span>' +
+               '<span class="d"><div class="dd">' + wd + '</div><div class="left">' + left + '</div></span></div>';
+      }).join('');
+    }
+    var a = document.getElementById('askList');
+    if (a){
+      a.innerHTML = ASK.map(function(e){
+        return '<div class="endrow"><span class="info"><div class="n">' + e.n + '</div>' +
+               '<div class="r">' + e.r + '</div></span></div>';
+      }).join('');
+    }
+  }
+
   function renderChips(){
     var n = dayNumber();
+    renderSyndulor();
 
     document.querySelectorAll('.med[data-startoff]').forEach(function(card){
       var off = parseInt(card.dataset.startoff, 10);
@@ -746,6 +818,7 @@
   }, { once:true });
 
   renderAppts();
+  renderEnds();
   checkDue();
   setInterval(checkDue, 30000);
 
